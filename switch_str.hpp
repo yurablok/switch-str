@@ -13,20 +13,21 @@
 //
 // void test(const std::string_view& value) {
 //     switch_str(value,
-//         "ERR", "MSH", "OBR", "PID") // No `{` !
+//         "ERR", "MSH", "OBR", "PID") {
 //     case_str("ERR"):
 //         ...
 //         break;
 //     case_str("MSH"):
-//         ...
+//         static_assert(switch_str_meta::cases().size() == 4);
+//         static_assert(switch_str_meta::cases()[1] == "MSH");
 //         break;
 //     case_str("PID"):
 //         ...
 //         break;
-//     case_str("PID"): // Duplication -> compile-time error.
+//     case_str("PID"): // Repetition -> compile-time error.
 //         ...
 //         break;
-//     case_str("PV1"): // Not listed -> compile-time error.
+//     case_str("PV1"): // Unlisted -> compile-time error.
 //         ...
 //         break;
 //     default:
@@ -40,42 +41,54 @@
 // License: BSL-1.0
 // https://github.com/yurablok/switch-str
 // History:
+// v1.1 11-Apr-21   Check for unlisted is now implemented on `static_assert` instead of `case 0`.
+//                  Added `switch_str_meta`.
 // v1.0 05-Apr-21   Initial stable.
 
 #pragma once
+#include <array>
 #include <string_view>
 #include <unordered_map>
 
 #ifndef switch_str
 
 #define switch_str(STR, ...) \
-    switch(constexpr std::string_view switch_cases[] = { __VA_ARGS__ }; \
-        [](const std::string_view& str, const std::string_view cases[], const uint32_t cases_size) -> uint32_t { \
-            static const auto m = [](const std::string_view cases[], const uint32_t cases_size) { \
+    switch ( \
+        struct switch_str_meta { \
+            static constexpr std::array<std::string_view, \
+                    std::initializer_list<const char*>({ __VA_ARGS__ }).size()> cases() { \
+                return {{ __VA_ARGS__ }}; \
+            } \
+        }; \
+        [](const std::string_view& str) -> uint32_t { \
+            static const auto m = []() { \
                 std::unordered_map<std::string_view, uint32_t> mm; \
-                mm.reserve(cases_size); \
-                for (uint32_t i = 0; i < cases_size; ++i) { \
-                    mm[cases[i]] = i + 1; \
+                mm.reserve(switch_str_meta::cases().size()); \
+                for (uint32_t i = 0; i < switch_str_meta::cases().size(); ++i) { \
+                    mm[switch_str_meta::cases()[i]] = i; \
                 } \
-                return std::move(mm); \
-            }(cases, cases_size); \
+                return mm; \
+            }(); \
             const auto it = m.find(str); \
             if (it == m.end()) { \
-                return cases_size + 1; \
+                return switch_str_meta::cases().size(); \
             } \
             return it->second; \
-        }(STR, switch_cases, sizeof(switch_cases) / sizeof(switch_cases[0]))) { \
-    case 0: break;
+        }(STR) \
+    )
 
 #define case_str(STR) \
-    case [](const std::string_view& str, const std::string_view cases[], \
-            const uint32_t cases_size) -> uint32_t { \
-        for (uint32_t i = 0; i < cases_size; ++i) { \
-            if (cases[i] == str) { \
-                return i + 1; \
+    case []() constexpr -> uint32_t { \
+        constexpr uint32_t idx = []() constexpr -> uint32_t { \
+            for (uint32_t i = 0; i < switch_str_meta::cases().size(); ++i) { \
+                if (switch_str_meta::cases()[i] == STR) { \
+                    return i; \
+                } \
             } \
-        } \
-        return 0; \
-    }(STR, switch_cases, sizeof(switch_cases) / sizeof(switch_cases[0]))
+            return switch_str_meta::cases().size(); \
+        }(); \
+        static_assert(idx != switch_str_meta::cases().size(), "unlisted case"); \
+        return idx; \
+    }()
 
 #endif // switch_str
