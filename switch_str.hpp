@@ -64,14 +64,14 @@
             static const auto m = []() { \
                 std::unordered_map<std::string_view, uint32_t> mm; \
                 mm.reserve(switch_str_meta::cases().size()); \
-                for (uint32_t i = 0; i < switch_str_meta::cases().size(); ++i) { \
+                for (uint32_t i = 0; i < static_cast<uint32_t>(switch_str_meta::cases().size()); ++i) { \
                     mm[switch_str_meta::cases()[i]] = i; \
                 } \
                 return mm; \
             }(); \
             const auto it = m.find(str); \
             if (it == m.end()) { \
-                return switch_str_meta::cases().size(); \
+                return static_cast<uint32_t>(switch_str_meta::cases().size()); \
             } \
             return it->second; \
         }(STR) \
@@ -80,12 +80,12 @@
 #define case_str(STR) \
     case []() constexpr -> uint32_t { \
         constexpr uint32_t idx = []() constexpr -> uint32_t { \
-            for (uint32_t i = 0; i < switch_str_meta::cases().size(); ++i) { \
+            for (uint32_t i = 0; i < static_cast<uint32_t>(switch_str_meta::cases().size()); ++i) { \
                 if (switch_str_meta::cases()[i] == STR) { \
                     return i; \
                 } \
             } \
-            return switch_str_meta::cases().size(); \
+            return static_cast<uint32_t>(switch_str_meta::cases().size()); \
         }(); \
         static_assert(idx != switch_str_meta::cases().size(), "unlisted case"); \
         return idx; \
