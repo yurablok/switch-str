@@ -11,7 +11,7 @@
 // ```cpp
 // #include <switch_str.hpp>
 //
-// void test(const std::string_view& value) {
+// void test(const std::string_view value) {
 //     switch_str(value,
 //         "ERR", "MSH", "OBR", "PID") {
 //     case_str("ERR"):
@@ -60,7 +60,7 @@
                 return {{ __VA_ARGS__ }}; \
             } \
         }; \
-        [](const std::string_view& str) -> uint32_t { \
+        [](const std::string_view str) -> uint32_t { \
             static const auto m = []() { \
                 std::unordered_map<std::string_view, uint32_t> mm; \
                 mm.reserve(switch_str_meta::cases().size()); \

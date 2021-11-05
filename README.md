@@ -11,7 +11,7 @@ C++17 O(1) switch for strings.
 ```cpp
 #include <switch_str.hpp>
 
-void test(const std::string_view& value) {
+void test(const std::string_view value) {
     switch_str(value,
         "ERR", "MSH", "OBR", "PID") {
     case_str("ERR"):
