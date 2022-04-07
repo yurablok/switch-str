@@ -36,3 +36,10 @@ void test(const std::string_view value) {
     }
 }
 ```
+
+## Minimum compiler versions:
+|       | C++17 |  C++20  |
+| :---: | :---: | :-----: |
+| Clang |  5.0  |  10.0   |
+|  GCC  |  7.3  |  10.1   |
+|  MSVC | 19.15 | ?19.34? |
