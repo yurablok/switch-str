@@ -42,4 +42,4 @@ void test(const std::string_view value) {
 | :---: | :---: | :-----: |
 | Clang |  5.0  |  10.0   |
 |  GCC  |  7.3  |  10.1   |
-|  MSVC | 19.15 | ?19.34? |
+|  MSVC | 19.15(15.8) | 19.32(17.2) |
